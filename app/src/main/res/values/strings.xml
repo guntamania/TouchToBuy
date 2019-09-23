@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">TouchToBuy</string>
+    <string-array name="currency_list">
+        <item>BTC</item>
+        <item>YEN</item>
+    </string-array>
+</resources>
