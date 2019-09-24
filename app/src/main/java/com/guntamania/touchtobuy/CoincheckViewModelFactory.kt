@@ -6,13 +6,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.guntamania.touchtobuy.repository.CoincheckRepository
 import com.guntamania.touchtobuy.viewmodel.CoincheckViewModel
-import java.lang.IllegalArgumentException
 
-class CoincheckViewModelFactory(private val repository: CoincheckRepository) : ViewModelProvider.NewInstanceFactory() {
+class CoincheckViewModelFactory(private val application: Application, private val repository: CoincheckRepository) : ViewModelProvider.NewInstanceFactory() {
 
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CoincheckViewModel::class.java)) {
-            return CoincheckViewModel(repository, ObservableField("")) as T
+            return CoincheckViewModel(repository, ObservableField(""), application) as T
         }
         throw IllegalArgumentException()
     }
@@ -22,9 +21,9 @@ class CoincheckViewModelFactory(private val repository: CoincheckRepository) : V
         @Volatile
         private var INSTANCE: CoincheckViewModelFactory? = null
 
-        fun getInstance(repository: CoincheckRepository) =
+        fun getInstance(application: Application, repository: CoincheckRepository) =
             INSTANCE ?: synchronized(CoincheckViewModelFactory::class.java) {
-                INSTANCE ?: CoincheckViewModelFactory(repository)
+                INSTANCE ?: CoincheckViewModelFactory(application,repository)
                     .also { INSTANCE = it }
             }
 

@@ -87,6 +87,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun obtainViewModel(repo: CoincheckRepository): CoincheckViewModel =
-        ViewModelProviders.of(this, CoincheckViewModelFactory.getInstance(repo)).get(CoincheckViewModel::class.java)
+        ViewModelProviders.of(this, CoincheckViewModelFactory.getInstance(this.application, repo)).get(
+            CoincheckViewModel::class.java
+        )
 
 }

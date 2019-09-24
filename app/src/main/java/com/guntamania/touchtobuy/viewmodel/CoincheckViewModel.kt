@@ -1,8 +1,9 @@
 package com.guntamania.touchtobuy.viewmodel
 
+import android.app.Application
 import androidx.databinding.ObservableField
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.guntamania.touchtobuy.repository.CoincheckRepository
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -12,14 +13,17 @@ import retrofit2.HttpException
 
 class CoincheckViewModel(
     private val repository: CoincheckRepository,
-    val rateTextObseravable: ObservableField<String>
-) : ViewModel() {
+    val rateTextObseravable: ObservableField<String>,
+    private val app: Application
+) : AndroidViewModel(app) {
 
     val status = MutableLiveData<String>()
     val buyAmount = MutableLiveData<String>()
     val buyPrice = MutableLiveData<String>()
     val sellAmount = MutableLiveData<String>()
     val sellPrice = MutableLiveData<String>()
+    val buyCurrencySpinnerPosition = MutableLiveData<Int>()
+    val sellCurrencySpinnerPosition = MutableLiveData<Int>()
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
@@ -30,13 +34,19 @@ class CoincheckViewModel(
             .subscribe({ ticker ->
                 rateTextObseravable.set(ticker.last.toString())
             }, { error ->
-                android.util.Log.d("GNTM", "ERROD:" + error.message)
+                status.value = "エラー：" + error.message
             }).addTo(compositeDisposable)
     }
 
     fun onClickBuyButton() {
-        val amount = buyAmount.value?.let { java.lang.Double.parseDouble(it) }
+        var amount = buyAmount.value?.let { java.lang.Double.parseDouble(it) }
         val price = buyPrice.value?.let { java.lang.Long.parseLong(it) }
+        val currency = buyCurrencySpinnerPosition.value
+        if (currency == 1) {
+            price?.let {
+                amount = (amount ?: 0.0) / it.toDouble()
+            }
+        }
         repository.postExchange(amount!!, "buy", price!!)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -52,8 +62,14 @@ class CoincheckViewModel(
     }
 
     fun onClickSellButton() {
-        val amount = sellAmount.value?.let { java.lang.Double.parseDouble(it) }
+        var amount = sellAmount.value?.let { java.lang.Double.parseDouble(it) }
         val price = sellPrice.value?.let { java.lang.Long.parseLong(it) }
+        val currency = buyCurrencySpinnerPosition.value
+        if (currency == 1) {
+            price?.let {
+                amount = (amount ?: 0.0) / it.toDouble()
+            }
+        }
         repository.postExchange(amount!!, "sell", price!!)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

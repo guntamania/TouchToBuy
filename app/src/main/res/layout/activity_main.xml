@@ -92,8 +92,8 @@
                             android:layout_gravity="center_vertical"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:entries="@array/currency_list">
-                    </Spinner>
+                            android:entries="@array/currency_list"
+                            android:selectedItemPosition="@={viewmodel.buyCurrencySpinnerPosition}" />
 
                 </LinearLayout>
 
@@ -160,8 +160,8 @@
                             android:layout_gravity="center_vertical"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:entries="@array/currency_list">
-                    </Spinner>
+                            android:entries="@array/currency_list"
+                            android:selectedItemPosition="@={viewmodel.sellCurrencySpinnerPosition}" />
 
                 </LinearLayout>
 
