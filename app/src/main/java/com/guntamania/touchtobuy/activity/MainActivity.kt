@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         repository = CoincheckRepository(this)
         val viewModel = obtainViewModel(repository)
         binding.viewmodel = viewModel
+        binding.setLifecycleOwner(this)
         viewModel.status.observe(this, Observer { status ->
             Toast.makeText(this@MainActivity, status, Toast.LENGTH_LONG).show()
         })

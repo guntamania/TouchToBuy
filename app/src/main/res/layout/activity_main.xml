@@ -1,12 +1,14 @@
-<layout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
         <variable
                 name="viewmodel"
-                type="com.guntamania.touchtobuy.viewmodel.CoincheckViewModel"/>
+                type="com.guntamania.touchtobuy.viewmodel.CoincheckViewModel" />
+
+        <import type="android.view.View" />
     </data>
 
     <FrameLayout
@@ -18,26 +20,26 @@
                 android:layout_height="match_parent">
 
             <LinearLayout
-                    android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:orientation="vertical"
                     android:padding="16dp"
                     tools:context=".activity.MainActivity">
 
                 <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="current rate:"/>
+                        android:text="current rate:" />
 
                 <TextView
                         android:id="@+id/rateTextView"
-                        android:layout_margin="4dp"
-                        android:textSize="32sp"
-                        android:textAlignment="textEnd"
-                        android:layout_gravity="end"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{viewmodel.rateTextObseravable.get()}"/>
+                        android:layout_gravity="end"
+                        android:layout_margin="4dp"
+                        android:text="@{viewmodel.rateTextObseravable.get()}"
+                        android:textAlignment="textEnd"
+                        android:textSize="32sp" />
 
                 <LinearLayout
                         android:layout_width="match_parent"
@@ -48,23 +50,23 @@
                             android:id="@+id/balanceJpyTextView"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1" />
 
                     <TextView
                             android:id="@+id/balanceBtcTextView"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1" />
                 </LinearLayout>
 
                 <!-- 買い注文セクション -->
 
                 <TextView
-                        android:layout_marginTop="4dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:text="BUY"
-                        android:textSize="24sp"/>
+                        android:textSize="24sp" />
 
                 <LinearLayout
                         android:layout_width="match_parent"
@@ -72,26 +74,26 @@
                         android:orientation="horizontal">
 
                     <com.google.android.material.textfield.TextInputLayout
-                            android:layout_weight="1"
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1">
 
 
                         <EditText
                                 android:id="@+id/buyAmountEditText"
-                                android:text="@={viewmodel.buyAmount}"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:hint="数量"
                                 android:inputType="numberDecimal"
-                                android:hint="数量"/>
+                                android:text="@={viewmodel.buyAmount}" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <Spinner
                             android:id="@+id/buyUnitSpinner"
-                            android:layout_gravity="center_vertical"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
                             android:entries="@array/currency_list"
                             android:selectedItemPosition="@={viewmodel.buyCurrencySpinnerPosition}" />
 
@@ -101,37 +103,40 @@
                         android:id="@+id/limitedBuyCheckBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="指値"/>
+                        android:checked="@={viewmodel.limitedBuyCheckBox}"
+                        android:text="指値" />
 
                 <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/buyPriveTextInputLayout"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:visibility="@{viewmodel.limitedBuyCheckBox ? View.VISIBLE : View.GONE}"
+                        app:errorEnabled="true">
 
                     <EditText
-                            android:text="@={viewmodel.buyPrice}"
-                            android:id="@+id/buyPrice"
-                            android:hint="価格"
-                            android:inputType="number"
+                            android:id="@+id/buyPriceEditText"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content"
+                            android:hint="価格"
+                            android:text="@={viewmodel.buyPrice}" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <Button
-                        android:onClick="@{(v) -> viewmodel.onClickBuyButton()}"
-                        android:text="買注文"
-                        android:layout_gravity="end"
                         android:layout_width="120dp"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:onClick="@{(v) -> viewmodel.onClickBuyButton()}"
+                        android:text="買注文" />
 
                 <!-- 売り注文セクション -->
 
                 <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="SELL"
                         android:layout_marginTop="6dp"
-                        android:textSize="24sp"/>
+                        android:text="SELL"
+                        android:textSize="24sp" />
 
 
                 <LinearLayout
@@ -140,26 +145,26 @@
                         android:orientation="horizontal">
 
                     <com.google.android.material.textfield.TextInputLayout
-                            android:layout_weight="1"
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1">
 
 
                         <EditText
-                                android:text="@={viewmodel.sellAmount}"
                                 android:id="@+id/sellAmountEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:hint="数量"
                                 android:inputType="numberDecimal"
-                                android:hint="数量"/>
+                                android:text="@={viewmodel.sellAmount}" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <Spinner
                             android:id="@+id/sellUnitSpinner"
-                            android:layout_gravity="center_vertical"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
                             android:entries="@array/currency_list"
                             android:selectedItemPosition="@={viewmodel.sellCurrencySpinnerPosition}" />
 
@@ -169,29 +174,31 @@
                         android:id="@+id/limitedSellCheckBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="指値"/>
+                        android:checked="@={viewmodel.limitedSellCheckBox}"
+                        android:text="指値" />
 
                 <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:visibility="@{viewmodel.limitedSellCheckBox ? View.VISIBLE : View.GONE}">
 
                     <EditText
-                            android:text="@={viewmodel.buyPrice}"
                             android:id="@+id/sellPrice"
-                            android:inputType="number"
-                            android:hint="価格"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content"
+                            android:hint="価格"
+                            android:inputType="number"
+                            android:text="@={viewmodel.sellPrice}" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <Button
-                        android:onClick="@{(v) -> viewmodel.onClickSellButton()}"
-                        android:text="売注文"
                         android:id="@+id/sellConfirmButton"
-                        android:layout_gravity="end"
                         android:layout_width="120dp"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:onClick="@{(v) -> viewmodel.onClickSellButton()}"
+                        android:text="売注文" />
 
             </LinearLayout>
 
