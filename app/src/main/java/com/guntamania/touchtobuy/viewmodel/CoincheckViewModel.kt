@@ -51,7 +51,7 @@ class CoincheckViewModel(
         val price = if (limitedBuyCheckBox.value == true) {
             buyPrice.value?.let { java.lang.Long.parseLong(it) }
         } else {
-            rateTextObseravable.get()?.toLong()
+            rateTextObseravable.get()?.toDouble()?.toLong()
         }
         val currency = buyCurrencySpinnerPosition.value
         if (currency == 1) {
@@ -65,7 +65,7 @@ class CoincheckViewModel(
             .subscribe({ orderData ->
                 status.value =
                     if (limitedBuyCheckBox.value == true) "指値注文成功"
-                    else  "成行注文成功"
+                    else "成行注文成功"
             }, { error ->
                 if (error is HttpException) {
                     status.value = "通信エラー：" + error.message
@@ -77,10 +77,10 @@ class CoincheckViewModel(
 
     fun onClickSellButton() {
         var amount = sellAmount.value?.let { java.lang.Double.parseDouble(it) }
-        val price = if(limitedSellCheckBox.value == true) {
+        val price = if (limitedSellCheckBox.value == true) {
             sellPrice.value?.let { java.lang.Long.parseLong(it) }
-        }else {
-            rateTextObseravable.get()?.toLong()
+        } else {
+            rateTextObseravable.get()?.toDouble()?.toLong()
         }
         val currency = sellCurrencySpinnerPosition.value
         if (currency == 1) {
@@ -94,7 +94,7 @@ class CoincheckViewModel(
             .subscribe({ orderData ->
                 status.value =
                     if (limitedSellCheckBox.value == true) "指値注文成功"
-                    else  "成行注文成功"
+                    else "成行注文成功"
             }, { error ->
                 if (error is HttpException) {
                     status.value = "通信エラー：" + error.message
