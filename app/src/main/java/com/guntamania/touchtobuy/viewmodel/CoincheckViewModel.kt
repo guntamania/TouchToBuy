@@ -4,11 +4,8 @@ import android.app.Application
 import android.view.View
 import androidx.databinding.ObservableField
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.guntamania.touchtobuy.R
-import com.guntamania.touchtobuy.activity.MainActivity
+import com.guntamania.touchtobuy.Event
 import com.guntamania.touchtobuy.repository.CoincheckRepository
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -31,6 +28,8 @@ class CoincheckViewModel(
     val sellCurrencySpinnerPosition = MutableLiveData<Int>()
     val limitedBuyCheckBox = MutableLiveData<Boolean>()
     val limitedSellCheckBox = MutableLiveData<Boolean>()
+    val openBuyDialogEvent = MutableLiveData<Event<Pair<Long, Double>>>()
+    val openSellDialogEvent = MutableLiveData<Event<Pair<Long, Double>>>()
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
@@ -46,23 +45,39 @@ class CoincheckViewModel(
         buyCurrencySpinnerPosition.value = 1
     }
 
-    fun onClickBuyButton() {
-        var amount = buyAmount.value?.let { java.lang.Double.parseDouble(it) }
+    fun onClickBuyButton(view: View) {
+        var amount = buyAmount.value?.let { java.lang.Double.parseDouble(it) } ?: return
         val price = if (limitedBuyCheckBox.value == true) {
             buyPrice.value?.let { java.lang.Long.parseLong(it) }
         } else {
             rateTextObseravable.get()?.toDouble()?.toLong()
-        }
+        } ?: return
         val currency = buyCurrencySpinnerPosition.value
         if (currency == 1) {
-            price?.let {
-                amount = (amount ?: 0.0) / it.toDouble()
-            }
+            amount /= price.toDouble()
         }
-        repository.postExchange(amount!!, "buy", price!!)
+        openBuyDialogEvent.value = Event(Pair(price, amount))
+    }
+
+    fun onClickSellButton() {
+        var amount = sellAmount.value?.let { java.lang.Double.parseDouble(it) } ?: return
+        val price = if (limitedSellCheckBox.value == true) {
+            sellPrice.value?.let { java.lang.Long.parseLong(it) }
+        } else {
+            rateTextObseravable.get()?.toDouble()?.toLong()
+        } ?: return
+        val currency = sellCurrencySpinnerPosition.value
+        if (currency == 1) {
+            amount /= price.toDouble()
+        }
+        openSellDialogEvent.value = Event(Pair(price, amount))
+    }
+
+    fun onBuyConfirmed(price: Long, amount: Double) {
+        repository.postExchange(amount, "buy", price)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ orderData ->
+            .subscribe({
                 status.value =
                     if (limitedBuyCheckBox.value == true) "指値注文成功"
                     else "成行注文成功"
@@ -75,23 +90,11 @@ class CoincheckViewModel(
             }).addTo(compositeDisposable)
     }
 
-    fun onClickSellButton() {
-        var amount = sellAmount.value?.let { java.lang.Double.parseDouble(it) }
-        val price = if (limitedSellCheckBox.value == true) {
-            sellPrice.value?.let { java.lang.Long.parseLong(it) }
-        } else {
-            rateTextObseravable.get()?.toDouble()?.toLong()
-        }
-        val currency = sellCurrencySpinnerPosition.value
-        if (currency == 1) {
-            price?.let {
-                amount = (amount ?: 0.0) / it.toDouble()
-            }
-        }
-        repository.postExchange(amount!!, "sell", price!!)
+    fun onSellConfirmed(price: Long, amount: Double) {
+        repository.postExchange(amount, "sell", price)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ orderData ->
+            .subscribe({
                 status.value =
                     if (limitedSellCheckBox.value == true) "指値注文成功"
                     else "成行注文成功"

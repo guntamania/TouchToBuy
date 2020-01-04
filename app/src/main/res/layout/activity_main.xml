@@ -126,7 +126,7 @@
                         android:layout_width="120dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:onClick="@{(v) -> viewmodel.onClickBuyButton()}"
+                        android:onClick="@{(v) -> viewmodel.onClickBuyButton(v)}"
                         android:text="買注文" />
 
                 <!-- 売り注文セクション -->

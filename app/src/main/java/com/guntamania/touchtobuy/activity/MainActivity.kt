@@ -12,8 +12,10 @@ import androidx.lifecycle.ViewModelProviders
 import com.guntamania.touchtobuy.CoincheckViewModelFactory
 import com.guntamania.touchtobuy.R
 import com.guntamania.touchtobuy.databinding.ActivityMainBinding
+import com.guntamania.touchtobuy.dialog.TradeDialogFragment
 import com.guntamania.touchtobuy.repository.CoincheckRepository
 import com.guntamania.touchtobuy.viewmodel.CoincheckViewModel
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 
 
@@ -24,9 +26,29 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
+        val binding =
+            DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
         repository = CoincheckRepository(this)
-        val viewModel = obtainViewModel(repository)
+        val viewModel = obtainViewModel(repository).apply {
+            openBuyDialogEvent.observe(this@MainActivity, Observer { e ->
+                e.getContentIfNotHandled()?.let { pair ->
+                    showBuyDialog(pair.first, pair.second).subscribe { confirmed ->
+                        if (confirmed) {
+                            onBuyConfirmed(pair.first, pair.second)
+                        }
+                    }
+                }
+            })
+            openSellDialogEvent.observe(this@MainActivity, Observer { e ->
+                e.getContentIfNotHandled()?.let {pair ->
+                    showSellDialog(pair.first, pair.second).subscribe{ confirmed ->
+                        if(confirmed) {
+                            onSellConfirmed(pair.first, pair.second)
+                        }
+                    }
+                }
+            })
+        }
         binding.viewmodel = viewModel
         binding.setLifecycleOwner(this)
         viewModel.status.observe(this, Observer { status ->
@@ -59,6 +81,30 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    private fun showBuyDialog(price: Long, amount: Double): Single<Boolean> =
+        TradeDialogFragment.Builder()
+            .apply {
+                title = "buy $amount by $price Yen"
+                message = "are you sure?"
+                cancelable = false
+                positiveButtonText = "Buy"
+                negativeButtonText = "Cancel"
+            }
+            .create(this)
+            .showWithObservable(this.supportFragmentManager, "BUY_TAG")
+
+    private fun showSellDialog(price: Long, amount: Double): Single<Boolean> =
+        TradeDialogFragment.Builder()
+            .apply {
+                title = "sell $amount by $price Yen"
+                message = "are you sure?"
+                cancelable = false
+                positiveButtonText = "Sell"
+                negativeButtonText = "Cancel"
+            }
+            .create(this)
+            .showWithObservable(this.supportFragmentManager, "SELL_TAG")
+
     private fun updateStatus() {
 //        if (apiKey() == null || secretKey() == null) {
 //            rateTextView.text = "SET KEYS FIRST"
@@ -88,7 +134,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun obtainViewModel(repo: CoincheckRepository): CoincheckViewModel =
-        ViewModelProviders.of(this, CoincheckViewModelFactory.getInstance(this.application, repo)).get(
+        ViewModelProviders.of(
+            this,
+            CoincheckViewModelFactory.getInstance(this.application, repo)
+        ).get(
             CoincheckViewModel::class.java
         )
 
