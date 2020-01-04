@@ -11,8 +11,8 @@ Android Client for Coincheck API
 
 Open this project by Android Studio and built it.
 
-# Why this app exits
+# Why this app exists
 
-This app is designed in accordance with MVVM pattern.
-Android Architecture Component make development easy.
-I expect this app would help your undestanding design patterns rather than practical usage.
+This app is designed in accordance with a MVVM pattern.
+Android Architecture Components are used to make development smooth and simple.
+I expect this app would help your understanding design patterns rather than practical usage.
