@@ -7,11 +7,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.guntamania.touchtobuy.Event
 import com.guntamania.touchtobuy.repository.CoincheckRepository
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import retrofit2.HttpException
+import java.util.concurrent.TimeUnit
 
 class CoincheckViewModel(
     private val repository: CoincheckRepository,
@@ -34,9 +36,10 @@ class CoincheckViewModel(
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     fun load() {
-        repository.createTickerObservable()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+        createIntervalObservable()
+            .flatMap { repository.createTickerObservable() }
+            .observeOn(Schedulers.io())
+            .subscribeOn(AndroidSchedulers.mainThread())
             .subscribe({ ticker ->
                 rateTextObseravable.set(ticker.last.toString())
             }, { error ->
@@ -77,6 +80,7 @@ class CoincheckViewModel(
         repository.postExchange(amount, "buy", price)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
+            .doOnComplete { clearForms() }
             .subscribe({
                 status.value =
                     if (limitedBuyCheckBox.value == true) "指値注文成功"
@@ -94,6 +98,7 @@ class CoincheckViewModel(
         repository.postExchange(amount, "sell", price)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
+            .doOnComplete { clearForms() }
             .subscribe({
                 status.value =
                     if (limitedSellCheckBox.value == true) "指値注文成功"
@@ -105,6 +110,15 @@ class CoincheckViewModel(
                     status.value = "エラー" + error.toString() + error.message
                 }
             }).addTo(compositeDisposable)
+    }
+
+    private fun createIntervalObservable() = Observable.interval(3, TimeUnit.SECONDS)
+
+    private fun clearForms() {
+        buyAmount.value = ""
+        sellAmount.value = ""
+        buyPrice.value = ""
+        sellPrice.value = ""
     }
 
     override fun onCleared() {
